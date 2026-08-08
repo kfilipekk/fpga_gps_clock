@@ -1,6 +1,6 @@
 #one run per module, `make uart_tx` for just one
 
-UNITS = uart_tx pps_capture tdc_core tdc btn_toggle sd_dac disc_loop
+UNITS = uart_tx pps_capture tdc_core tdc btn_toggle sd_dac disc_loop gpsdo_top
 
 all: $(UNITS)
 

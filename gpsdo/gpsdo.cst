@@ -1,0 +1,8 @@
+//gps pps, pulled down so an unplugged module reads 0
+
+IO_LOC  "pps" 25;
+IO_PORT "pps" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+
+//sigma delta out, rc filter to the vctcxo
+IO_LOC  "efc" 27;
+IO_PORT "efc" IO_TYPE=LVCMOS33 PULL_MODE=NONE;

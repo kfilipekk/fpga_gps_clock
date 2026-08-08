@@ -1,0 +1,25 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [gpsdo]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
+        with:
+          version: '2026-07-19'
+      - run: python3 -m pip install -r requirements.txt
+      - run: make -C ${{ matrix.dir }} lint
+      - run: make -C ${{ matrix.dir }} sim
+      - run: make -C ${{ matrix.dir }}
+      - run: make -C ${{ matrix.dir }} formal
+      - run: for t in $(find ${{ matrix.dir }} -path '*/host/test_*.py'); do python3 $t || exit 1; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bitstream-${{ strategy.job-index }}
+          path: ${{ matrix.dir }}/build/*.fs
