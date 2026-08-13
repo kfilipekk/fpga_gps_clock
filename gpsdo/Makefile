@@ -14,5 +14,9 @@ lint-lib:
 		rtl/tdc_wu.v rtl/tdc.v rtl/tdc_chain.v rtl/tdc_core.v
 	verilator --lint-only -Wall -Wno-PROCASSINIT --top-module cal_mon \
 		rtl/cal_mon.v rtl/tdc.v rtl/tdc_chain.v rtl/tdc_core.v rtl/ring_osc.v
+	verilator --lint-only -Wall -Wno-PROCASSINIT --top-module tic \
+		rtl/tic.v rtl/tdc.v rtl/tdc_chain.v rtl/tdc_core.v
+	verilator --lint-only -Wall -Wno-PROCASSINIT --top-module rf_stamp \
+		rtl/rf_stamp.v rtl/tdc.v rtl/tdc_chain.v rtl/tdc_core.v
 
 .PHONY: lint-lib
