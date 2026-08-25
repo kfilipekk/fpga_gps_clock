@@ -1,0 +1,18 @@
+//gps pps, pulled down so an unplugged module reads 0
+
+IO_LOC  "pps" 25;
+IO_PORT "pps" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+
+//cc1101 gdo0, the ook envelope
+IO_LOC  "cc1101_data" 27;
+IO_PORT "cc1101_data" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+
+//cc1101 spi
+IO_LOC  "cc1101_sck"  28;
+IO_PORT "cc1101_sck"  IO_TYPE=LVCMOS33;
+IO_LOC  "cc1101_mosi" 29;
+IO_PORT "cc1101_mosi" IO_TYPE=LVCMOS33;
+IO_LOC  "cc1101_miso" 30;
+IO_PORT "cc1101_miso" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC  "cc1101_csn"  26;
+IO_PORT "cc1101_csn"  IO_TYPE=LVCMOS33;
