@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dir: [gpsdo]
+        dir: [gpsdo, extras/radio433]
     steps:
       - uses: actions/checkout@v4
       - uses: YosysHQ/setup-oss-cad-suite@v3

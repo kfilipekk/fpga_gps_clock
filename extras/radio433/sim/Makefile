@@ -1,12 +1,17 @@
 #one run per module, `make ook_rx` for just one
 
-UNITS = ook_rx spi_cfg glitch_filt pwm_slice sync_frame nrz_sample uart_rx \
+UNITS = ook_rx radio433_top spi_cfg glitch_filt pwm_slice sync_frame nrz_sample uart_rx \
         nexus_decode nexus_encode manch_decode
+HW    = radio433_top_hw radio433_top_nrz radio433_top_transcode
 
-all: $(UNITS) pwm_slice_adapt sync_frame_crc
+all: $(UNITS) $(HW) pwm_slice_adapt sync_frame_crc
 
 $(UNITS):
 	$(MAKE) -f cocotb.mk COCOTB_TOPLEVEL=$@ COCOTB_TEST_MODULES=test_$@ \
+		SIM_BUILD=sim_build/$@ COCOTB_RESULTS_FILE=sim_build/$@/results.xml
+
+$(HW):
+	$(MAKE) -f cocotb.mk COCOTB_TOPLEVEL=radio433_top COCOTB_TEST_MODULES=test_$@ \
 		SIM_BUILD=sim_build/$@ COCOTB_RESULTS_FILE=sim_build/$@/results.xml
 
 #same rtl, other params
@@ -21,4 +26,4 @@ sync_frame_crc:
 clean:
 	rm -rf sim_build __pycache__
 
-.PHONY: all clean $(UNITS) pwm_slice_adapt sync_frame_crc
+.PHONY: all clean $(UNITS) $(HW) pwm_slice_adapt sync_frame_crc
