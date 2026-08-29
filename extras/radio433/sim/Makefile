@@ -1,7 +1,7 @@
 #one run per module, `make ook_rx` for just one
 
 UNITS = ook_rx spi_cfg glitch_filt pwm_slice sync_frame nrz_sample uart_rx \
-        manch_decode
+        nexus_decode nexus_encode manch_decode
 
 all: $(UNITS) pwm_slice_adapt sync_frame_crc
 
