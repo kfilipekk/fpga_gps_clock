@@ -1,0 +1,21 @@
+[tasks]
+bmc
+cover
+
+[options]
+bmc: mode bmc
+bmc: depth 160
+cover: mode cover
+cover: depth 96
+
+[engines]
+smtbmc yices
+
+[script]
+read -formal uart_tx.v uart_rx.v uart_loop_f.v
+prep -top uart_loop_f
+
+[files]
+../../../gpsdo/rtl/uart_tx.v
+../rtl/uart_rx.v
+uart_loop_f.v
