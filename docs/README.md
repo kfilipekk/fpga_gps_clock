@@ -1,10 +1,11 @@
 # Docs
 
-What is measured and how it is checked. Every figure is
+What is measured, how it is checked and what comes next. Every figure is
 measured on the board unless stated otherwise.
 
 [Spec sheet](#spec-sheet) · [Measurements](#measurements) ·
-[Verification](#verification) · [Reproduce](#reproduce)
+[Verification](#verification) · [Roadmap](#roadmap) ·
+[Multi-node plan](#multi-node-plan) · [Reproduce](#reproduce)
 
 ## Spec Sheet
 
@@ -115,6 +116,55 @@ loop out of lock, none the triplicated one
 zero-delay stubs in simulation and are characterised on silicon. That gap
 showed twice: a TDC trigger change passed every test and hung on the
 board, and the TMR merge only showed in the synthesis stats.
+
+## Roadmap
+
+Needs wiring or a part:
+
+1. **GPS sawtooth correction.** gpsdo/host/ubx.py already reads qErr.
+   Route the M8N's TX to a spare FPGA pin and forward it on the FPGA's
+   UART, which should take most of the 6.5 ns off the 1 s figure.
+2. **Close the loop.** The PI loop and sigma-delta DAC are proven in
+   simulation. A ~£5 VCTCXO on the EFC pin locks the -6.47 ppm crystal.
+3. **Speed of light in coax.** One output, two cable lengths, two TIC
+   inputs, giving the velocity factor to a few mm.
+4. **Interleave the hops.** Place the two chains so their hops fall at
+   different phases, so wave union removes the wide bins.
+5. **LoRa CubeSats (stretch).** SX1278 and an ESP32, per-packet frequency
+   error corrected the xocal way and stamped by rf_stamp.
+
+With an RTL-SDR:
+
+6. **Doppler orbit determination**, the main goal. Record a pass (Meteor-M
+   at 137.9 MHz or a CubeSat beacon at 435 to 438 MHz) with a GPS-referenced
+   FPGA pilot tone, fit the time and range of closest approach with a UKF
+   and compare against the published orbit.
+7. **GRAVES space radar.** The 143.05 MHz CW illuminator needs no
+   reference channel, giving UTC-stamped meteor and satellite echoes to
+   check against SGP4.
+8. **SDR as ground truth.** Measure the calibrated CC1101 carrier
+   independently, and record GPS L1 IQ for a fabric correlator.
+
+Later, the multi-node plan below.
+
+## Multi-node Plan
+
+Receivers at known positions r_i timestamp the same signal against a
+common clock. Each pair gives a hyperboloid,
+
+    (t_i - t_j) * c = |p - r_i| - |p - r_j|
+
+so three receivers give a 2D fix and four give 3D, without knowing the
+transmit time. Light moves 30 cm/ns, so a metre needs the nodes to agree to
+a nanosecond. The GPS epoch, the discipline loop, the ~31 ps TDC and
+tic/rf_stamp already provide that per node; correlation and the solve stay
+on the host.
+
+Phases: two boards on one GPS with their PPS phase difference measured,
+then two nodes and a known 433 MHz beacon checked against the geometry,
+then four or more nodes and a moving transmitter. The picoseconds are
+clock alignment; position accuracy is set by bandwidth, SNR, geometry and
+multipath.
 
 ## Reproduce
 
