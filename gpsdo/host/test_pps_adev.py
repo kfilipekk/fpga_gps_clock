@@ -27,6 +27,9 @@ def capture(secs=600):
 def test_split_on_period():
     pps, ring = split(capture(20) + ["garbage", "019BFCC0"])
     assert len(pps) == 20 and len(ring) == 50000
+    #run lines with the ocxo count and efc word on the end
+    pps, _ = split(["019BFCC0 123 00989680 8000", "019BFCC0 123 00989680"])
+    assert pps == [(0x019BFCC0, 0x123)]
 
 
 def test_tdc_beats_the_count():

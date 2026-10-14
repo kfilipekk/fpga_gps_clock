@@ -27,7 +27,7 @@ MIN_SEEN = 3
 CLK_HZ = 27e6
 TAP_PS = 43            #rough ps per tap, for display only
 OUR_ID = 0xA3          #the esp node, humidity field is its sound level
-GPSDO_RE = re.compile(r"^([0-9A-Fa-f]{8}) ([0-9A-Fa-f]{3})$")
+GPSDO_RE = re.compile(r"^([0-9A-Fa-f]{8}) ([0-9A-Fa-f]{3})( [0-9A-Fa-f]{8} [0-9A-Fa-f]{4})?$")
 
 devs = {}
 sensors = {}

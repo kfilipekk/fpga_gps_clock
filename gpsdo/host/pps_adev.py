@@ -12,8 +12,9 @@ from timing import NOMINAL, allan_dev, fine_periods
 def split(lines):
     pps, ring = [], []
     for line in lines:
+        #run lines carry the ocxo count and efc word after these two
         f = line.split()
-        if len(f) != 2:
+        if len(f) not in (2, 4):
             continue
         try:
             p, tap = int(f[0], 16), int(f[1], 16)
