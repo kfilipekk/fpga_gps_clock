@@ -36,6 +36,9 @@ endif
 ifeq ($(COCOTB_TOPLEVEL),disc_loop)
 COMPILE_ARGS += -Pdisc_loop.KP=3 -Pdisc_loop.KI=5 -Pdisc_loop.LOCK_ERR=4
 endif
+ifeq ($(SIM_BUILD),sim_build/gpsdo_top_open)
+COMPILE_ARGS += -Pgpsdo_top.OPEN=1 -Pgpsdo_top.FIXED=40000
+endif
 ifeq ($(SIM_BUILD),sim_build/disc_loop_seu_tmr)
 COMPILE_ARGS += -Pdisc_loop.TMR=1
 endif

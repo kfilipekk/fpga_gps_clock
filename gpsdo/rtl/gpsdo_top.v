@@ -11,7 +11,9 @@ module gpsdo_top #(
     parameter WINDOW   = 50,       //counts off nominal the loop will act on
     parameter ERR_SHIFT = 8,       //one efc lsb is ~4e-4 counts, so scale up
     parameter KP       = 16,
-    parameter KI       = 3
+    parameter KI       = 3,
+    parameter OPEN     = 0,        //free-running runs: hold efc at FIXED
+    parameter [15:0] FIXED = 16'h8000
 ) (
     input  wire       clk,
     input  wire       pps,
@@ -136,9 +138,11 @@ module gpsdo_top #(
         .locked(locked)
     );
 
+    wire [15:0] efc_word = OPEN ? FIXED : dac_word;
+
     sd_dac u_dac (
         .clk (clk),
-        .word(dac_word),
+        .word(efc_word),
         .pdm (efc)
     );
 
@@ -172,7 +176,7 @@ module gpsdo_top #(
             p_snap   <= p_lat;
             f_snap   <= fine;
             o_snap   <= o_lat;
-            d_snap   <= dac_word;
+            d_snap   <= efc_word;
             short    <= cal;
             idx      <= 5'd0;
             sending  <= 1'b1;
