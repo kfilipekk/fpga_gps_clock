@@ -58,6 +58,13 @@ after the second field, to keep the sample rate up.
 prints the OCXO's error each second, its mean over the last minute and the
 tuning voltage.
 
+    python3 host/gpsdo_log.py /dev/ttyUSB1 --out overnight.log
+    python3 host/gpsdo_plot.py overnight.log --png overnight.png
+
+logs overnight with UTC timestamps, survives USB disconnects and prints a
+status each minute; gpsdo_plot.py plots lock-in, Allan deviation with the
+100 ns counter resolution limit line, and time error.
+
 ## Modules
 
 | Module | Role |
