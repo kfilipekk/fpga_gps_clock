@@ -6,3 +6,7 @@ IO_PORT "pps" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
 //sigma delta out, rc filter to the vctcxo
 IO_LOC  "efc" 27;
 IO_PORT "efc" IO_TYPE=LVCMOS33 PULL_MODE=NONE;
+
+//ocxo 10 mhz, through a 1k/2k divider from its 5 v output
+IO_LOC  "ocxo" 26;
+IO_PORT "ocxo" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;

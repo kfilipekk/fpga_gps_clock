@@ -24,7 +24,7 @@ ifeq ($(COCOTB_TOPLEVEL),btn_toggle)
 COMPILE_ARGS += -Pbtn_toggle.HOLD=4
 endif
 ifeq ($(COCOTB_TOPLEVEL),gpsdo_top)
-COMPILE_ARGS += -Pgpsdo_top.BTN_HOLD=4 -Pgpsdo_top.LOSS=300
+COMPILE_ARGS += -Pgpsdo_top.BTN_HOLD=4 -Pgpsdo_top.LOSS=300 -Pgpsdo_top.OCXO_HZ=740
 endif
 
 #narrow dac
