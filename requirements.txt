@@ -3,3 +3,5 @@ cocotb
 numpy
 msgspec
 fastcrc
+#host plots
+matplotlib
