@@ -14,13 +14,17 @@ def split(lines):
     for line in lines:
         #run lines carry the ocxo count and efc word after these two
         f = line.split()
-        if len(f) not in (2, 4):
+        if len(f) not in (2, 3, 4, 6):
             continue
         try:
             p, tap = int(f[0], 16), int(f[1], 16)
         except ValueError:
             continue
-        (pps if abs(p - NOMINAL) < NOMINAL * 1e-3 else ring).append((p, tap))
+        if abs(p - NOMINAL) < NOMINAL * 1e-3:
+            if len(f) in (2, 4, 6):
+                pps.append((p, tap))
+        else:
+            ring.append((p, tap))
     return pps, ring
 
 

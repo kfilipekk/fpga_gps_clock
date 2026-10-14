@@ -13,12 +13,12 @@ WINDOW = 60
 
 
 def parse(line):
-    #PPPPPPPP FFF OOOOOOOO DDDD -> (ocxo count, efc word)
+    #PPPPPPPP FFF OOOOOOOO DDDD or PPPPPPPP AAA BBB IIIIIIII OOOOOOOO DDDD
     f = line.split()
-    if len(f) != 4:
+    if len(f) not in (4, 6):
         return None
     try:
-        return int(f[2], 16), int(f[3], 16)
+        return int(f[-2], 16), int(f[-1], 16)
     except ValueError:
         return None
 
