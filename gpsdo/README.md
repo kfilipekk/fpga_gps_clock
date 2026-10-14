@@ -2,9 +2,9 @@
 
 A GPS-disciplined clock for the Tang Nano 9K. Every second the FPGA counts
 27 MHz cycles between GPS 1PPS edges, and a carry-chain TDC measures where
-inside the cycle each edge landed, about 25 ps a tap. A PI loop turns the
-error into a control word for a VCTCXO. Measured figures are in
-[docs](../docs/README.md).
+inside the cycle each edge landed, about 25 ps a tap. A 10 MHz OCXO is
+counted over the same GPS second, and a PI loop steers it onto GPS through
+its tuning pin. Measured figures are in [docs](../docs/README.md).
 
 ## Build and Run
 
@@ -23,8 +23,14 @@ from whatever was flashed before.
 | Signal | Pin |
 |---|---|
 | GPS 1PPS, 3.3 V | 25, pulled down so an unplugged module reads 0 |
-| VCTCXO EFC | 27, sigma-delta output, RC filter to the control pin |
-| GPS GND | board GND |
+| OCXO out (pin 1) | 1 kΩ to 26, 2 kΩ from 26 to GND: its output is 5 V logic |
+| OCXO Vref (pin 3) | 10 kΩ from 27, 10 µF from pin 3 to GND |
+| OCXO Vcc (pin 5) | 5 V, its own supply: 600 mA warming, 250 mA warm |
+| OCXO GND (pin 2), GPS GND | board GND, shared with the OCXO supply |
+
+The OCXO is a CTI OSC5A2B02. Pin 3 is its tuning input, 0 to 4 V with a
+positive slope of about 0.75 ppm/V; the RC filter turns the sigma-delta
+stream into a steady voltage. Pin 4 is unconnected.
 
 A u-blox NEO-M8N only starts its timepulse once it has a fix. On modules
 without a PPS header pin, solder to the PPS LED pad.
@@ -36,13 +42,21 @@ LEDs: 0 toggles on every PPS, 1 calibration mode, 2 locked, 3 holdover,
 
 One line per second:
 
-    019BFCC0 1F3
+    019BFCC0 1F3 00989680 8000
 
-The first field is the period in clock cycles. 0x019BFCC0 is 27,000,000,
-dead on frequency, and each count off is 37 ppb. The second is the TDC
-code, how far the edge ran along the chain before the next clock edge. In
-simulation the chain has no delays and reads full scale, so codes only mean
-anything on silicon.
+The first field is the board clock's period in cycles. 0x019BFCC0 is
+27,000,000, dead on frequency, and each count off is 37 ppb. The second is
+the TDC code, how far the edge ran along the chain before the next clock
+edge. In simulation the chain has no delays and reads full scale, so codes
+only mean anything on silicon. The third is the OCXO's cycles over the same
+second, 0x00989680 when it is on frequency, 100 ppb a count. The last is
+the tuning word, 0x8000 at mid scale. In calibration mode the line stops
+after the second field, to keep the sample rate up.
+
+    cat /dev/ttyUSB1 | python3 host/ocxo.py
+
+prints the OCXO's error each second, its mean over the last minute and the
+tuning voltage.
 
 ## Modules
 
@@ -104,20 +118,31 @@ drift block to block. Verified in simulation, not yet on the bench.
 
 ## Discipline Loop
 
-A PI loop turns the period error into a 16-bit DAC word. The proportional
-term handles steps, the integrator takes up the steady offset, and both
-gains are power-of-two shifts, so there is no multiplier. The word drives a
-first-order sigma-delta on the EFC pin, and an RC filter there gives the
-control voltage and pushes the 1-bit noise out of the loop band. Only real
-PPS edges drive the loop; ring calibration is masked out.
+The error is the OCXO's count short of 10,000,000 each second, positive
+when it runs slow. The OCXO is sampled on the board clock rather than used
+as a clock: through the divider its edges are too slow to clock flops, and
+on silicon that double counted by up to 12%. Those errors summed
+are its phase against GPS in cycles, so the integrator holds phase and the
+loop pulls the frequency error to zero, with a fixed phase offset.
 
-If PPS is lost for over a second the loop enters holdover and freezes the
-DAC at its last good word, so the crystal free-runs instead of chasing
-noise.
+One tuning step moves the OCXO only ~4e-4 Hz, so the error is scaled up by
+2^8 before the loop, and with KI=3 each cycle of phase moves the word 32
+steps. That gives a time constant of about 80 s, set by the OCXO's tuning
+slope. The proportional term is kept tiny (KP=16): the count is only good
+to one cycle a second, and feeding that straight to the tuning pin would
+add 100 ppb of jitter. The word drives a first-order sigma-delta on the
+tuning pin, and the RC filter turns it into a steady voltage.
 
-The loop is proven closed in simulation against a modelled oscillator: it
-converges, locks, holds through a PPS dropout and re-tracks a shifted
-oscillator. Wiring a VCTCXO and choosing real gains is the bench step.
+The loop only acts on counts within 50 cycles (5 ppm) of nominal, so a
+missing or still-warming OCXO, or a count spanning a PPS gap, never reaches
+the integrator. Ring calibration is masked out too. If PPS is lost for
+over a second the loop enters holdover and freezes the word, so the OCXO
+free-runs on its oven. LED 2 lights once the count has stayed within one
+cycle for 32 seconds.
+
+The loop is proven closed in simulation against a modelled oscillator, and
+the top-level test checks the sign: a slow OCXO raises the word, a fast
+one lowers it, and one out of the window leaves it alone.
 
 ## Single Event Upsets
 
