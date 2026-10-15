@@ -23,14 +23,21 @@ from whatever was flashed before.
 | Signal | Pin |
 |---|---|
 | GPS 1PPS, 3.3 V | 25, pulled down so an unplugged module reads 0 |
-| OCXO out (pin 1) | 1 kΩ to 26, 2 kΩ from 26 to GND: its output is 5 V logic |
-| OCXO Vref (pin 3) | 10 kΩ from 27, 10 µF from pin 3 to GND |
+| OCXO out (pin 1) | 1 kΩ at the pin, wire to 26, 2 kΩ from 26 to GND: its output is 5 V logic |
+| OCXO Vref (pin 3) | 10 kΩ from 27, 10 to 22 µF from pin 3 to GND |
 | OCXO Vcc (pin 5) | 5 V, its own supply: 600 mA warming, 250 mA warm |
 | OCXO GND (pin 2), GPS GND | board GND, shared with the OCXO supply |
 
 The OCXO is a CTI OSC5A2B02. Pin 3 is its tuning input, 0 to 4 V with a
-positive slope of about 0.75 ppm/V; the RC filter turns the sigma-delta
-stream into a steady voltage. Pin 4 is unconnected.
+positive slope of 0.76 ppm/V, measured by stepping it; the RC filter turns
+the sigma-delta stream into a steady voltage. Pin 4 is unconnected.
+
+The OCXO's 5 V edges jam the GPS. With a small patch antenna next to it the
+receiver heard a few satellites at 20 to 25 dB and lost its fix; with the
+OCXO off the same antenna got 30 to 36 dB and a fix in seconds, and pulling
+only the pin 1 wire recovered about half of that. A larger antenna a metre
+away gave PPS in all but 12 seconds of three hours. Keep the antenna away
+from the OCXO and its wires, and the 1 kΩ right at pin 1.
 
 A u-blox NEO-M8N only starts its timepulse once it has a fix. On modules
 without a PPS header pin, solder to the PPS LED pad.
@@ -147,9 +154,32 @@ over a second the loop enters holdover and freezes the word, so the OCXO
 free-runs on its oven. LED 2 lights once the count has stayed within one
 cycle for 32 seconds.
 
-The loop is proven closed in simulation against a modelled oscillator, and
-the top-level test checks the sign: a slow OCXO raises the word, a fast
-one lowers it, and one out of the window leaves it alone.
+The top-level test checks the sign: a slow OCXO raises the word, a fast
+one lowers it, and one out of the window leaves it alone. OPEN=1 holds the
+word at FIXED instead, for free running runs.
+
+## Measured
+
+![ocxo allan deviation](../docs/img/ocxo-adev.png)
+
+One night, the loop closed for three hours and then held open at the
+locked word for three more, logged with host/gpsdo_log.py. The OCXO pulled
+in from -250 ppb within three minutes and the tuning voltage then crept
+from 1.98 to 2.00 V as the loop followed its drift.
+
+| τ | board crystal | OCXO free | OCXO locked |
+|---|---|---|---|
+| 1 s | 22 ppb | 46 ppb | 47 ppb |
+| 16 s | 2.8 ppb | 3.7 ppb | 3.6 ppb |
+| 256 s | 8.0 ppb | 0.82 ppb | 0.38 ppb |
+| 1024 s | 20 ppb | 1.4 ppb | 0.42 ppb |
+
+Below about 100 s both OCXO curves sit on the counter's limit, one cycle of
+phase in a second, so the OCXO's own short-term stability is hidden there.
+Above it the free OCXO wanders and the locked one stays put. The locked
+figures are in loop, against the same GPS that steers it.
+
+    python3 host/ocxo_adev.py locked.log free.log --png ocxo-adev.png
 
 ## Single Event Upsets
 
@@ -203,6 +233,8 @@ the hardware side.
 
 ## Next
 
+- Time the OCXO against GPS with the TDC instead of counting cycles, to see
+  below 100 s.
 - Drop N to about 700, since half the chain is spare range.
 - Stream cal_mon on the UART, tagged, for live recalibration.
 - The rest is in the [roadmap](../docs/README.md#roadmap).
