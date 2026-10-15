@@ -31,6 +31,9 @@ Nano 9K) with the open source flow.
 | Allan deviation, 1 s | 11.2 ppb with the TDC, 21.2 ppb count only | 1,899 s run |
 | Allan deviation floor | 2.65 ppb at 8 to 16 s | crystal wander above ~30 s |
 | GPS PPS jitter | 6.5 ns rms per edge | NEO-M8N sawtooth |
+| OCXO locked to GPS | 0.42 ppb at 1024 s, in loop | 2.5 h, [gpsdo](../gpsdo/README.md#measured) |
+| OCXO free running | 1.4 ppb at 1024 s | 3.2 h, same night |
+| OCXO tuning | 0.76 ppm/V, pull-in within 3 min | CTI OSC5A2B02 |
 | frequency transfer | CC1101 carrier to ±0.21 Hz at 433.92 MHz, 300 s | [xocal](../extras/xocal/README.md) |
 | radio packet stamp | per-packet UTC, to one 37 ns clock for now | [radio433](../extras/radio433/README.md) |
 
@@ -42,8 +45,9 @@ Limits:
   third of the time. The cause is unconfirmed
   ([ticprec](../extras/ticprec/README.md)).
 - 1 s stability is set by the GPS pulse (6.5 ns), not the TDC (~30 ps).
-- The discipline loop is proven in simulation only, until a VCTCXO is
-  wired.
+- The loop measures the OCXO by counting its cycles, one cycle of phase a
+  second, so below about 100 s the OCXO's own stability is hidden, and the
+  locked figures are in loop.
 
 ## Measurements
 
@@ -80,7 +84,17 @@ quantisation is 1.2 ppb on a 1 s interval, while the M8N's pulse jitters
 pulse to its own clock (a uniform ±10.4 ns would give 6.0 ns).
 UBX-TIM-TP qErr reports that offset for each pulse, so subtracting it is
 the next improvement. Past ~30 s the curves merge and climb as the crystal
-warms and wanders, which is what the discipline loop and a VCTCXO are for.
+warms and wanders, which is what the discipline loop and an OCXO are for.
+
+### OCXO Locked to GPS
+
+![ocxo allan deviation](img/ocxo-adev.png)
+
+A CTI OSC5A2B02 OCXO counted against the GPS PPS, three hours with the loop
+closed and three with it held open at the locked word. Locked, it holds
+0.42 ppb at 1024 s, 50 times better than the board crystal and three times
+better than the same OCXO free running. Below about 100 s both OCXO curves
+are the counter's limit. Details in [gpsdo](../gpsdo/README.md#measured).
 
 ## Verification
 
@@ -90,10 +104,10 @@ tests on every push.
 | Layer | What | How |
 |---|---|---|
 | lint | verilator -Wall on every top and library module | `make lint` |
-| simulation | 48 cocotb tests over 29 RTL modules, all but the two silicon-only delay lines | `make sim` |
+| simulation | 50 cocotb tests over 29 RTL modules, all but the two silicon-only delay lines | `make sim` |
 | formal | SymbiYosys, two unbounded proofs and one bounded check | `make formal` |
 | upsets | bit flip campaign on the discipline loop | `make -C gpsdo/sim disc_loop_seu disc_loop_seu_tmr` |
-| host | 45 tests on the analysis code, synthetic captures with known answers | `python3 */host/test_*.py` |
+| host | 62 tests on the analysis code, synthetic captures with known answers | `python3 */host/test_*.py` |
 
 - **uart_tx, proved.** Every accepted byte comes out as start, 8 data bits
   LSB first and stop, DIV clocks each, idle high otherwise. k-induction.
@@ -124,8 +138,9 @@ Needs wiring or a part:
 1. **GPS sawtooth correction.** gpsdo/host/ubx.py already reads qErr.
    Route the M8N's TX to a spare FPGA pin and forward it on the FPGA's
    UART, which should take most of the 6.5 ns off the 1 s figure.
-2. **Close the loop.** The PI loop and sigma-delta DAC are proven in
-   simulation. A ~£5 VCTCXO on the EFC pin locks the -6.47 ppm crystal.
+2. **TDC phase detector.** Divide the OCXO to a PPS and time it against GPS
+   with tic, so the loop and the plot see below 100 s. Needs clean OCXO
+   edges first, a 74HC14 between the divider and the pin.
 3. **Speed of light in coax.** One output, two cable lengths, two TIC
    inputs, giving the velocity factor to a few mm.
 4. **Interleave the hops.** Place the two chains so their hops fall at
@@ -179,3 +194,9 @@ multipath.
 
     #single-shot precision, ticprec bitstream, no wiring
     python3 extras/ticprec/host/tic_prec.py tic.txt --png precision.png
+
+    #ocxo, gpsdo bitstream: a night closed, then rebuilt with the loop open
+    python3 gpsdo/host/gpsdo_log.py /dev/ttyUSB1 --out locked.log
+    make -C gpsdo flash PARAMS="chparam -set OPEN 1 -set FIXED <word> gpsdo_top"
+    python3 gpsdo/host/gpsdo_log.py /dev/ttyUSB1 --out free.log
+    python3 gpsdo/host/ocxo_adev.py locked.log free.log --png ocxo-adev.png
