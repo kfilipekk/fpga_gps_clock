@@ -10,7 +10,7 @@ Every electronic device keeps time with a tiny vibrating crystal, but cheap crys
 
 ![How steady is each clock](docs/img/compare.png)
 
-The board's own crystal also runs about 5 parts per million slow, half a second a day, but a fixed offset like that can be measured and corrected. What matters is how much the rate wanders, which is what the chart compares. The orange and blue bars are measured; the grey ones are typical figures for commercial references, for scale.
+The board's own crystal also runs about 5 parts per million slow, around 13 seconds a month, about as good as a Casio digital watch (specified to ±30 seconds a month). A fixed offset like that can be measured and corrected, and locked to GPS the OCXO has none. What matters is how much the rate wanders, which is what the chart compares. The orange and blue bars are measured; the grey ones are typical figures for commercial references, for scale.
 
 <div align="center">
 
