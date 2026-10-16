@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #allan deviation of the ocxo locked and free running, with the board crystal
-#from both. takes two gpsdo_log.py captures, the loop closed then held open
+#from the locked run. takes two gpsdo_log.py captures, loop closed and open
 #python3 ocxo_adev.py locked.log free.log [--skip 1800] [--png out.png]
 
 import argparse
@@ -29,10 +29,14 @@ def analyse(locked, free):
     #counts spanning a pps gap are not one second
     def ocxo(rows):
         return [(o - OCXO_HZ) / OCXO_HZ for _, o in rows if abs(o - OCXO_HZ) < 50]
-    board = [(b - NOMINAL) / NOMINAL for b, _ in locked + free
+    #one continuous run, the two logs need not be back to back
+    board = [(b - NOMINAL) / NOMINAL for b, _ in locked
              if abs(b - NOMINAL) < NOMINAL * 1e-3]
-    return {"board": allan_dev(board), "free": allan_dev(ocxo(free)),
-            "locked": allan_dev(ocxo(locked))}
+    #fewer than 8 blocks of tau leaves too few differences to trust
+    def adev(y):
+        return [(t, v) for t, v in allan_dev(y) if len(y) >= 8 * t]
+    return {"board": adev(board), "free": adev(ocxo(free)),
+            "locked": adev(ocxo(locked))}
 
 
 def plot(r, h_locked, h_free, path):
@@ -78,8 +82,9 @@ def main():
     print(f"locked {len(locked)} s, free {len(free)} s")
     board, free_d = dict(r["board"]), dict(r["free"])
     for tau, s in r["locked"]:
+        free_s = f"{free_d[tau] * 1e9:7.3f}" if tau in free_d else "      -"
         print(f"{tau:6.0f} s  board {board[tau] * 1e9:7.2f} ppb  "
-              f"free {free_d.get(tau, 0) * 1e9:7.3f} ppb  locked {s * 1e9:7.3f} ppb")
+              f"free {free_s} ppb  locked {s * 1e9:7.3f} ppb")
     if a.png:
         plot(r, len(locked) / 3600, len(free) / 3600, a.png)
 

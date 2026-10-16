@@ -11,8 +11,8 @@ def test_reads_raw_and_stamped_lines():
 
 def test_locked_beats_free_at_long_tau():
     #locked dithers one count, free drifts a count every 128 s
-    locked = [(27_000_000, 10_000_000 + (i % 2)) for i in range(1024)]
-    free = [(27_000_000, 10_000_000 + i // 128) for i in range(1024)]
+    locked = [(27_000_000, 10_000_000 + (i % 2)) for i in range(2048)]
+    free = [(27_000_000, 10_000_000 + i // 128) for i in range(2048)]
     r = analyse(locked, free)
     assert dict(r["locked"])[256] < dict(r["free"])[256]
 
