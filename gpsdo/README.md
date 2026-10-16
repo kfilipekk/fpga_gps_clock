@@ -28,6 +28,8 @@ from whatever was flashed before.
 | OCXO Vcc (pin 5) | 5 V, its own supply: 600 mA warming, 250 mA warm |
 | OCXO GND (pin 2), GPS GND | board GND, shared with the OCXO supply |
 
+![bench](../docs/img/bench.jpg)
+
 The OCXO is a CTI OSC5A2B02. Pin 3 is its tuning input, 0 to 4 V with a
 positive slope of 0.76 ppm/V, measured by stepping it; the RC filter turns
 the sigma-delta stream into a steady voltage. Pin 4 is unconnected.

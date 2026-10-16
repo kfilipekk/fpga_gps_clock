@@ -50,6 +50,10 @@ flowchart LR
 
 Where both chains land in ordinary taps the spread is ~31 ps per channel; where the carry crosses a fabric column one tap is 5 ns wide. Against GPS, the TDC halves the 1 s figure and what is left is the GPS module's own pulse jitter. Locked to GPS over 17.8 hours, the OCXO holds 0.32 ppb at 1024 s, against 1.4 ppb free running and 33 ppb for the board crystal. Every number and the capture behind it is in [docs](docs/README.md).
 
+![Bench](docs/img/bench.jpg)
+
+The bench: the Tang Nano 9K, the OCXO with its tuning RC, and the GPS antenna's coax.
+
 ## Getting Started
 
 ### Prerequisites
