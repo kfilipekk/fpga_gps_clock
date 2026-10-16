@@ -162,22 +162,25 @@ word at FIXED instead, for free running runs.
 
 ![ocxo allan deviation](../docs/img/ocxo-adev.png)
 
-One night, the loop closed for three hours and then held open at the
-locked word for three more, logged with host/gpsdo_log.py. The OCXO pulled
-in from -250 ppb within three minutes and the tuning voltage then crept
-from 1.98 to 2.00 V as the loop followed its drift.
+The loop closed for 17.8 hours, with PPS in 99.8% of seconds, logged with
+host/gpsdo_log.py, and on an earlier night held open at the locked word for
+3.2 hours. The OCXO pulls in from -250 ppb within three minutes, and over
+the long run the tuning voltage moved between 1.97 and 2.03 V as the loop
+followed its drift. The mean error after pull-in was -0.015 ppb.
 
 | τ | board crystal | OCXO free | OCXO locked |
 |---|---|---|---|
-| 1 s | 22 ppb | 46 ppb | 47 ppb |
-| 16 s | 2.8 ppb | 3.7 ppb | 3.6 ppb |
-| 256 s | 8.0 ppb | 0.82 ppb | 0.38 ppb |
-| 1024 s | 20 ppb | 1.4 ppb | 0.42 ppb |
+| 1 s | 21 ppb | 46 ppb | 54 ppb |
+| 16 s | 3.0 ppb | 3.7 ppb | 3.7 ppb |
+| 256 s | 16 ppb | 0.82 ppb | 0.68 ppb |
+| 1024 s | 33 ppb | 1.4 ppb | 0.32 ppb |
+| 4096 s | 75 ppb | | 0.052 ppb |
 
 Below about 100 s both OCXO curves sit on the counter's limit, one cycle of
 phase in a second, so the OCXO's own short-term stability is hidden there.
-Above it the free OCXO wanders and the locked one stays put. The locked
-figures are in loop, against the same GPS that steers it.
+Above it the free OCXO wanders and the locked one keeps falling. The
+locked figures are in loop, against the same GPS that steers it, and a
+point is only plotted with at least 8 blocks of its τ behind it.
 
     python3 host/ocxo_adev.py locked.log free.log --png ocxo-adev.png
 

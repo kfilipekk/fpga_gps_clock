@@ -31,7 +31,7 @@ Nano 9K) with the open source flow.
 | Allan deviation, 1 s | 11.2 ppb with the TDC, 21.2 ppb count only | 1,899 s run |
 | Allan deviation floor | 2.65 ppb at 8 to 16 s | crystal wander above ~30 s |
 | GPS PPS jitter | 6.5 ns rms per edge | NEO-M8N sawtooth |
-| OCXO locked to GPS | 0.42 ppb at 1024 s, in loop | 2.5 h, [gpsdo](../gpsdo/README.md#measured) |
+| OCXO locked to GPS | 0.32 ppb at 1024 s, 0.052 ppb at 4096 s, in loop | 17.8 h, [gpsdo](../gpsdo/README.md#measured) |
 | OCXO free running | 1.4 ppb at 1024 s | 3.2 h, same night |
 | OCXO tuning | 0.76 ppm/V, pull-in within 3 min | CTI OSC5A2B02 |
 | frequency transfer | CC1101 carrier to ±0.21 Hz at 433.92 MHz, 300 s | [xocal](../extras/xocal/README.md) |
@@ -90,10 +90,11 @@ warms and wanders, which is what the discipline loop and an OCXO are for.
 
 ![ocxo allan deviation](img/ocxo-adev.png)
 
-A CTI OSC5A2B02 OCXO counted against the GPS PPS, three hours with the loop
-closed and three with it held open at the locked word. Locked, it holds
-0.42 ppb at 1024 s, 50 times better than the board crystal and three times
-better than the same OCXO free running. Below about 100 s both OCXO curves
+A CTI OSC5A2B02 OCXO counted against the GPS PPS, 17.8 hours with the loop
+closed and 3.2 hours on another night with it held open at the locked word.
+Locked, it holds 0.32 ppb at 1024 s and 0.052 ppb at 4096 s, a hundred
+times better than the board crystal at 1024 s and four times better than
+the same OCXO free running. Below about 100 s both OCXO curves
 are the counter's limit. Details in [gpsdo](../gpsdo/README.md#measured).
 
 ## Verification

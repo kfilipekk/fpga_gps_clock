@@ -20,7 +20,7 @@ A GPS-disciplined OCXO with a picosecond time-to-digital converter on a £15 Sip
 | TDC step, median | 24.6 ps, from the adder carry chain |
 | Single-shot precision | ~31 ps rms per channel |
 | Crystal stability vs GPS | 11.2 ppb at 1 s, 2.65 ppb floor |
-| OCXO locked to GPS | 0.42 ppb at 1024 s in loop, 50× the board crystal |
+| OCXO locked to GPS | 0.32 ppb at 1024 s, 0.052 ppb at 4096 s, in loop |
 | Radio carrier | ±0.21 Hz at 433.92 MHz, no spectrum analyser |
 | Upset hardening | 130 of 200 bit flips break lock, 0 with TMR |
 | Verification | Formal proofs, 50 cocotb tests, CI on every push |
@@ -48,7 +48,7 @@ flowchart LR
     uart --> host([host: tap LUT,<br/>Allan deviation])
 ```
 
-Where both chains land in ordinary taps the spread is ~31 ps per channel; where the carry crosses a fabric column one tap is 5 ns wide. Against GPS, the TDC halves the 1 s figure and what is left is the GPS module's own pulse jitter. Locked to GPS, the OCXO holds 0.42 ppb at 1024 s, against 1.4 ppb free running and 20 ppb for the board crystal. Every number and the capture behind it is in [docs](docs/README.md).
+Where both chains land in ordinary taps the spread is ~31 ps per channel; where the carry crosses a fabric column one tap is 5 ns wide. Against GPS, the TDC halves the 1 s figure and what is left is the GPS module's own pulse jitter. Locked to GPS over 17.8 hours, the OCXO holds 0.32 ppb at 1024 s, against 1.4 ppb free running and 33 ppb for the board crystal. Every number and the capture behind it is in [docs](docs/README.md).
 
 ## Getting Started
 
