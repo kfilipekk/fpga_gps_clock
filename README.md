@@ -4,6 +4,14 @@
 
 A GPS-disciplined OCXO with a picosecond time-to-digital converter on a £15 Sipeed Tang Nano 9K (Gowin GW1NR-9C), built only with open source tools (yosys, nextpnr, apicula, cocotb and SymbiYosys). Made by Krystian Filipek.
 
+## In Plain Terms
+
+Every electronic device keeps time with a tiny vibrating crystal, but cheap crystals drift: they run slightly fast or slow, and change when the temperature changes. This clock checks itself against GPS satellites, which carry atomic clocks, and constantly corrects a much better crystal kept inside a tiny heated oven. Over almost 18 hours its rate wandered by only about one part in three billion, the same as drifting a second every hundred years, from a £15 board and a £4 oscillator.
+
+![How steady is each clock](docs/img/compare.png)
+
+The board's own crystal also runs about 5 parts per million slow, half a second a day, but a fixed offset like that can be measured and corrected. What matters is how much the rate wanders, which is what the chart compares. The orange and blue bars are measured; the grey ones are typical figures for commercial references, for scale.
+
 <div align="center">
 
 ![Single-shot Precision](docs/img/tic-precision.png)
